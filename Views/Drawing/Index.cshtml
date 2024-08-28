@@ -1,0 +1,144 @@
+﻿@using System.Text;
+@using Newtonsoft.Json;
+
+
+<script src="~/lib/microsoft-signalr/signalr.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.2.4/fabric.min.js"></script>
+<style>
+    #toolbar {
+        margin: 10px;
+    }
+
+        #toolbar button {
+            margin-right: 5px;
+        }
+</style>
+<div>
+<h2>Title</h2>
+    <canvas id="drawingCanvas" width="1200" height="600" style="border:1px solid #000;"></canvas>
+<div id="toolbar">
+    <button id="undoBtn">Undo</button>
+    <button id="redoBtn">Redo</button>
+    <label for="colorPicker">Brush Color:</label>
+    <input type="color" id="colorPicker" value="#000000">
+    <label for="brushSize">Brush Size:</label>
+    <input type="range" id="brushSize" min="1" max="100" value="5">
+</div>
+</div>
+
+<script>
+    var pData = @Html.Raw(JsonConvert.SerializeObject(ViewData["prevData"]));
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const did = urlParams.get('name');
+
+    var connection = new signalR.HubConnectionBuilder().withUrl(`/boardConnection?drawingId=${did}`).build();
+
+    connection.start().catch(function (err) {
+        return console.error(err.toString());
+    });
+
+    var canvas = new fabric.Canvas('drawingCanvas');
+    canvas.isDrawingMode = true;
+    canvas.freeDrawingBrush.color = "black";
+    canvas.freeDrawingBrush.width = 5;
+
+    var otherUsersState = {};
+    var myStates = [];
+    var undoneState = [];
+
+    connection.on('UserJoined', function (connectionId) {
+        otherUsersState[connectionId] = [];
+    });
+
+    connection.on("ReceiveData", function (connectionId, data) {
+        var pathData = toFabricPath(item)
+        otherUsersState[connectionId].push(pathData);
+        reRender();
+    });
+
+    connection.on("Undo", function (connectionId) {
+        otherUsersState[connectionId].pop();
+        reRender();
+    });
+
+    function sendDrawingData(data) {
+        connection.invoke("AddState", data)
+            .catch(err => console.error(err.toString()));
+    }
+
+    function reRender() {
+        canvas.clear();
+        var allState = myStates.concat(...Object.values(otherUsersState));
+        allState.forEach(function (path) {
+            canvas.add(path);
+        });
+    }
+
+    function addState(path) {
+        myStates.push(path);
+        canvas.add(path);
+        var jsonPath = path.toObject();//plain js object
+        var stringPath = JSON.stringify(jsonPath); //string for db`
+        sendDrawingData(stringPath);
+    }
+
+    function undo() {
+        if (myStates.length > 0) {
+            var state = myStates.pop();
+            connection.invoke("Undo",state);
+            undoneState.push(action);
+            reRender();
+        }
+    }
+
+    function redo() {
+        if (undoneState.length > 0) {
+            var data = undoneState.pop();
+            myStates.push(data);
+            reRender();
+            sendDrawingData(data);
+        }
+    }
+
+    canvas.on('path:created', function (event) {
+        const path = event.path;
+        addState(path);
+    });
+
+    document.getElementById('colorPicker').addEventListener('input', function (e) {
+        canvas.freeDrawingBrush.color = e.target.value;
+    });
+
+    document.getElementById('brushSize').addEventListener('input', function (e) {
+        canvas.freeDrawingBrush.width = parseInt(e.target.value, 10) || 1;
+    });
+
+    document.getElementById('undoBtn').addEventListener('click', function () {
+        undo();
+    });
+
+    document.getElementById('redoBtn').addEventListener('click', function () {
+        redo();
+    });
+
+    function renderPrevStates() {
+        otherUsersState["prev"] = [];
+        pData.forEach(function (item) {
+            var pathData = toFabricPath(item)
+            otherUsersState["prev"].push(pathData);
+        });
+        reRender();
+    }
+
+    function toFabricPath(data) {
+        var parsedPath = JSON.parse(data);
+        var pathObject = fabric.Path.fromObject(parsedPath);
+        return pathObject;
+    }
+
+    window.onload = function () {
+        renderPrevStates();
+    };
+
+</script>

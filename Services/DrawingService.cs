@@ -1,10 +1,12 @@
 ﻿
 using CDB.Data;
 using CDB.Models;
+using CDB.Models.Drawing;
 using CDB.Models.Entities;
+using Microsoft.EntityFrameworkCore;
 namespace CDB.Services
 {
-    public class DrawingService
+    public class DrawingService:IDrawingService
     {
         private readonly DrawingContext _dbContext;
 
@@ -12,40 +14,60 @@ namespace CDB.Services
         {
             _dbContext = dbContext;
         }
-        public async Task enterUser(string connectionId, string drawingId)
+        public async Task AddState(string DrawingName, string data)
         {
-            var user = new UserBasedData
+            var state = new DrawingState()
             {
-                ConnectionId = connectionId
+                Value = data,
+                DrawingName = DrawingName
             };
-            await _dbContext.UserBasedData.AddAsync(user);
-
-            var drawingBoard = await _dbContext.Drawings.FindAsync(drawingId);
-            if (drawingBoard != null)
-            {
-                drawingBoard.ConnectionId.Add(connectionId);
-                await _dbContext.SaveChangesAsync();
-            }
+            await _dbContext.DrawingStates.AddAsync(state);
+            await _dbContext.SaveChangesAsync();
         }
-        public async Task updateUserActivity(string connectionId, string data)
+
+        public async Task UndoAction(string drawingName, string data )
         {
-            var user = await _dbContext.UserBasedData.FindAsync(connectionId);
-            if (user != null)
-            {
-                user.Data.Add(data);
-                await _dbContext.SaveChangesAsync();
-            }
-        }
+            var drawindState = await _dbContext.DrawingStates
+                .FirstOrDefaultAsync(i => i.Value == data && i.DrawingName == drawingName);
+            _dbContext.DrawingStates.Remove(drawindState);
+            await _dbContext.SaveChangesAsync(); 
 
-        public async Task UndoAction(string connectionId)
+        }
+        public async Task<Response> Create(CreateViewModel model)
         {
-            var user = await _dbContext.UserBasedData.FindAsync(connectionId);
-            if (user != null)
+            var response= new Response();
+            try
             {
-                user.Data.RemoveAt(user.Data.Count - 1);
+                var data = new Drawing()
+                {
+                    Name = model.Name,
+                    UserName = model.UserName,
+                };
+                await _dbContext.Drawings.AddAsync(data);
                 await _dbContext.SaveChangesAsync();
+                response.success=true;
             }
+            catch (Exception ex) { 
+                Console.WriteLine(ex.ToString());
+                response.success=false;
 
+            }
+            return response;
         }
+
+        public async Task<List<string>> GetDrawing(string name)
+        {
+            var drawing=await _dbContext.Drawings
+                .Include(x=>x.states)
+                .FirstAsync(x=>x.Name==name);
+            List<string>data=new List<string>();
+            foreach (var cId in drawing.states) {
+                data.Add(cId.Value);
+            }
+            return data;
+            
+        }
+
+
     }
 }

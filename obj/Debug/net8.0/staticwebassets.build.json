@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "tko6kKkZmswiQ91euHcH063iwnNjsPMfWkShKOhKHMg=",
+  "Hash": "aADRTXtBmmL3FsZAfJBNpDOv842osZ62mRQHSAMiN4g=",
   "Source": "CDB",
   "BasePath": "_content/CDB",
   "Mode": "Default",
@@ -1193,6 +1193,44 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\lib\\jquery-validation-unobtrusive\\LICENSE.txt"
+    },
+    {
+      "Identity": "C:\\Users\\Syed Shifat\\source\\repos\\Collaborative Drawing Board\\CDB\\wwwroot\\lib\\microsoft-signalr\\signalr.js",
+      "SourceId": "CDB",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\Syed Shifat\\source\\repos\\Collaborative Drawing Board\\CDB\\wwwroot\\",
+      "BasePath": "_content/CDB",
+      "RelativePath": "lib/microsoft-signalr/signalr.js",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\lib\\microsoft-signalr\\signalr.js"
+    },
+    {
+      "Identity": "C:\\Users\\Syed Shifat\\source\\repos\\Collaborative Drawing Board\\CDB\\wwwroot\\lib\\microsoft-signalr\\signalr.min.js",
+      "SourceId": "CDB",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\Syed Shifat\\source\\repos\\Collaborative Drawing Board\\CDB\\wwwroot\\",
+      "BasePath": "_content/CDB",
+      "RelativePath": "lib/microsoft-signalr/signalr.min.js",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\lib\\microsoft-signalr\\signalr.min.js"
     }
   ]
 }

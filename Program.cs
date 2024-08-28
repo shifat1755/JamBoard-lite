@@ -1,16 +1,14 @@
-using CDB.Controllers;
 using CDB.Data;
 using Microsoft.EntityFrameworkCore;
 using CDB.Hubs;
-using Microsoft.AspNetCore.SignalR.Client;
 using CDB.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddSignalR();
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<DrawingContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("CDB")));
-builder.Services.AddSignalR();
-builder.Services.AddScoped<DrawingService>();
+builder.Services.AddScoped<IDrawingService,DrawingService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -27,7 +25,12 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthorization();
-app.MapHub<DrawingHub>($"/Board");
+
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapHub<DrawingHub>("/boardConnection");
+});
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");

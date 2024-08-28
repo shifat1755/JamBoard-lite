@@ -18,12 +18,12 @@ build_property.GenerateRazorMetadataSourceChecksumAttributes =
 build_property.MSBuildProjectDirectory = C:\Users\Syed Shifat\source\repos\Collaborative Drawing Board\CDB
 build_property._RazorSourceGeneratorDebug = 
 
-[C:/Users/Syed Shifat/source/repos/Collaborative Drawing Board/CDB/Views/Drawing/Board.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRHJhd2luZ1xCb2FyZC5jc2h0bWw=
+[C:/Users/Syed Shifat/source/repos/Collaborative Drawing Board/CDB/Views/Drawing/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRHJhd2luZ1xDcmVhdGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Syed Shifat/source/repos/Collaborative Drawing Board/CDB/Views/Drawing/List.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRHJhd2luZ1xMaXN0LmNzaHRtbA==
+[C:/Users/Syed Shifat/source/repos/Collaborative Drawing Board/CDB/Views/Drawing/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRHJhd2luZ1xJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/Syed Shifat/source/repos/Collaborative Drawing Board/CDB/Views/Home/Index.cshtml]
