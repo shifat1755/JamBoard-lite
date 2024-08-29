@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "mssql1": {
+      "serviceConnectorResourceId": "/subscriptions/[parameters('subscriptionId')]/resourcegroups/[parameters('resourceGroupName')]/providers/Microsoft.Web/sites/JamBoardLite/providers/Microsoft.ServiceLinker/linkers/ConnectionStringsCDB_6B13ECF250",
+      "secretStore": "AzureAppSettings",
+      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourcegroups/[parameters('resourceGroupName')]/providers/Microsoft.Sql/servers/cdbdbserver/databases/CDB_db",
+      "type": "mssql.azure",
+      "connectionId": "ConnectionStrings:CDB",
+      "dynamicId": null
+    }
+  }
+}

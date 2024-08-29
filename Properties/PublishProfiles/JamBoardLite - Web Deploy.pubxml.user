@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+This file is used by the publish/package process of your Web project. You can customize the behavior of this process
+by editing this MSBuild file. In order to learn more about this please visit https://go.microsoft.com/fwlink/?LinkID=208121. 
+-->
+<Project>
+  <PropertyGroup>
+    <TimeStampOfAssociatedLegacyPublishXmlFile />
+    <EncryptedPassword>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAA3mHwNWskBUS6QZSPQXqFBQAAAAACAAAAAAAQZgAAAAEAACAAAAA7nV07i5HVVVKK2k4re5BFpfFGjhg0ff4ztuLhEpP1TQAAAAAOgAAAAAIAACAAAAAycSFMW99Gs8tEVehZeM4iickoa/ipm84rtu+0WsqPaYAAAABP0VkDMPjhDv7wHR1JiY08IVxCPtNb05/fNxshFvXiTyxwGAJWDcJuuqYF272kGR+wKFs18/AUk4Nia2o5leSKx+xtXt/CtSjznYCJR8x1WXZ5MgWp0+85+rBU+EXXU+Yzt/jxliD8f+jX3BO4ceBFRL32TL5H92joEHOdXYp6GUAAAAC0gYXGHauRsPNKizSsoeza4oYKwuCOnbgIYQSff1rGi+PgjbwcfPAV/+C5+/0PHWzH/glKcU7f2fKZ2/WO8Pp/</EncryptedPassword>
+    <History>True|2024-08-29T21:04:10.6154159Z||;True|2024-08-30T02:47:29.6140084+06:00||;</History>
+    <LastFailureDetails />
+  </PropertyGroup>
+  <ItemGroup>
+    <DestinationConnectionStrings Include="CDB">
+      <Value>Data Source=cdbdbserver.database.windows.net,1433%3bInitial Catalog=CDB_db%3bUser ID=shifat1755%3bPassword=A1755%40html</Value>
+    </DestinationConnectionStrings>
+  </ItemGroup>
+  <ItemGroup>
+    <EFMigrations Include="CDB.Data.DrawingContext">
+      <Value>Data Source=cdbdbserver.database.windows.net,1433%3bInitial Catalog=CDB_db%3bUser ID=shifat1755%3bPassword=A1755%40html</Value>
+    </EFMigrations>
+  </ItemGroup>
+</Project>

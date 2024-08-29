@@ -33,7 +33,10 @@ namespace CDB.Controllers
         public async Task<IActionResult> Create(CreateViewModel model)
         {
             var response=await _drawingServcie.Create(model);
-
+            if (response.success == false) { 
+                ModelState.AddModelError("Name",response.message);
+                return View(model);
+            }
             return RedirectToAction("Index","Home");
         }
 

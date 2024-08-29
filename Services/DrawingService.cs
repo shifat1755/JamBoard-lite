@@ -28,7 +28,7 @@ namespace CDB.Services
         public async Task UndoAction(string drawingName, string data )
         {
             var drawindState = await _dbContext.DrawingStates
-                .FirstOrDefaultAsync(i => i.Value == data && i.DrawingName == drawingName);
+                .FirstOrDefaultAsync(i => i.DrawingName == drawingName && i.Value == data);
             _dbContext.DrawingStates.Remove(drawindState);
             await _dbContext.SaveChangesAsync(); 
 
@@ -36,6 +36,13 @@ namespace CDB.Services
         public async Task<Response> Create(CreateViewModel model)
         {
             var response= new Response();
+            var Exists=await _dbContext.Drawings.FirstOrDefaultAsync(i=>i.Name == model.Name);
+            if (Exists != null)
+            {
+                response.message = "Drawing name has to be unique.";
+                response.success = false;
+                return response;
+            }
             try
             {
                 var data = new Drawing()

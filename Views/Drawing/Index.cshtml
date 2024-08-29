@@ -17,8 +17,8 @@
 <h2>Title</h2>
     <canvas id="drawingCanvas" width="1200" height="600" style="border:1px solid #000;"></canvas>
 <div id="toolbar">
-    <button id="undoBtn">Undo</button>
-    <button id="redoBtn">Redo</button>
+    <button id="undoBtn" onclick="undoState()">Undo</button>
+    <button id="redoBtn" onclick="redoState()">Redo</button>
     <label for="colorPicker">Brush Color:</label>
     <input type="color" id="colorPicker" value="#000000">
     <label for="brushSize">Brush Size:</label>
@@ -27,6 +27,7 @@
 </div>
 
 <script>
+    var ConnectionID;
     var pData = @Html.Raw(JsonConvert.SerializeObject(ViewData["prevData"]));
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
@@ -34,33 +35,70 @@
 
     var connection = new signalR.HubConnectionBuilder().withUrl(`/boardConnection?drawingId=${did}`).build();
 
-    connection.start().catch(function (err) {
-        return console.error(err.toString());
-    });
+    connection.start()
+        .then(function () {
+            ConnectionID = connection.connectionId;
+            console.log("Connection ID:", ConnectionID);
+        })
+        .catch(function (err) {
+            console.error(err.toString());
+        });
+
 
     var canvas = new fabric.Canvas('drawingCanvas');
     canvas.isDrawingMode = true;
     canvas.freeDrawingBrush.color = "black";
     canvas.freeDrawingBrush.width = 5;
 
-    var otherUsersState = {};
-    var myStates = [];
-    var undoneState = [];
+    var AllUsersState = {};
+    var myUndoneStates = [];
 
     connection.on('UserJoined', function (connectionId) {
-        otherUsersState[connectionId] = [];
+        AllUsersState[connectionId] = []
+        console.log("joined",connectionId)
     });
 
-    connection.on("ReceiveData", function (connectionId, data) {
-        var pathData = toFabricPath(item)
-        otherUsersState[connectionId].push(pathData);
+    connection.on("ReceiveData", function (connectionId,data) {
+        console.log("received", connectionId, data)
+        var pathData = toFabricPath(data)
+        console.log("Restored received Path:", pathData);
+        if (!(connectionId in AllUsersState)) {
+            AllUsersState[connectionId] = [];
+        }
+        AllUsersState[connectionId].push(pathData);
+        console.log("AllUsersState", connectionId, AllUsersState)
+
         reRender();
     });
 
     connection.on("Undo", function (connectionId) {
-        otherUsersState[connectionId].pop();
+        AllUsersState[connectionId].pop();
         reRender();
     });
+
+    connection.on("dbData", function (data) {
+        console.log("inisde client Db receiver")
+        AllUsersState["db"] = [];
+        data.forEach(function (item) {
+            var pathData = toFabricPath(item)
+            AllUsersState["db"].push(pathData);
+        });
+        reRender();
+    })
+
+    connection.on("boardRequest", function (toConnection) {
+        Object.keys(AllUsersState).forEach(function (fromId) {
+            if (fromId === toConnection) {return;}
+            AllUsersState[fromId].forEach(function (path) {
+                const stringifiedPath = JSON.stringify(path.toObject());
+                connection.invoke("BoardData", toConnection, fromId, stringifiedPath)
+                    .catch(err => {
+                        console.error("Failed to invoke BoardData:", err.toString());
+                    });
+            });
+        });
+    });
+
 
     function sendDrawingData(data) {
         connection.invoke("AddState", data)
@@ -69,35 +107,45 @@
 
     function reRender() {
         canvas.clear();
-        var allState = myStates.concat(...Object.values(otherUsersState));
+        var allState = Object.values(AllUsersState).flat();
         allState.forEach(function (path) {
             canvas.add(path);
         });
     }
 
     function addState(path) {
-        myStates.push(path);
+        if (!(ConnectionID in AllUsersState)){
+            AllUsersState[ConnectionID] = [];
+        }
+        AllUsersState[ConnectionID].push(path);
         canvas.add(path);
-        var jsonPath = path.toObject();//plain js object
-        var stringPath = JSON.stringify(jsonPath); //string for db`
-        sendDrawingData(stringPath);
+        const stringifiedPath = JSON.stringify(path.toObject());
+        console.log("Stringified Path:", stringifiedPath);
+        sendDrawingData(stringifiedPath)
     }
 
-    function undo() {
-        if (myStates.length > 0) {
-            var state = myStates.pop();
-            connection.invoke("Undo",state);
-            undoneState.push(action);
+    function undoState() {
+        if (!(ConnectionID in AllUsersState)) { return; }
+        if (AllUsersState[ConnectionID].length > 0) {
+            var state = AllUsersState[ConnectionID].pop();
+            console.log(state)
+            myUndoneStates.push(state);
+            const stringifiedPath = JSON.stringify(state.toObject());
+            connection.invoke("Undo", stringifiedPath);
             reRender();
         }
     }
 
-    function redo() {
-        if (undoneState.length > 0) {
-            var data = undoneState.pop();
-            myStates.push(data);
+
+    function redoState() {
+        if (!(ConnectionID in AllUsersState)) { return; }
+        if (myUndoneStates.length > 0) {
+            var data = myUndoneStates.pop();
+            AllUsersState[ConnectionID].push(data);
             reRender();
-            sendDrawingData(data);
+            const stringifiedPath = JSON.stringify(data.toObject());
+
+            sendDrawingData(stringifiedPath);
         }
     }
 
@@ -105,6 +153,7 @@
         const path = event.path;
         addState(path);
     });
+
 
     document.getElementById('colorPicker').addEventListener('input', function (e) {
         canvas.freeDrawingBrush.color = e.target.value;
@@ -114,31 +163,9 @@
         canvas.freeDrawingBrush.width = parseInt(e.target.value, 10) || 1;
     });
 
-    document.getElementById('undoBtn').addEventListener('click', function () {
-        undo();
-    });
-
-    document.getElementById('redoBtn').addEventListener('click', function () {
-        redo();
-    });
-
-    function renderPrevStates() {
-        otherUsersState["prev"] = [];
-        pData.forEach(function (item) {
-            var pathData = toFabricPath(item)
-            otherUsersState["prev"].push(pathData);
-        });
-        reRender();
-    }
-
     function toFabricPath(data) {
-        var parsedPath = JSON.parse(data);
-        var pathObject = fabric.Path.fromObject(parsedPath);
-        return pathObject;
+        const parsedPathObject = JSON.parse(data);
+        const restoredPath = new fabric.Path(parsedPathObject.path, parsedPathObject);
+        return restoredPath;
     }
-
-    window.onload = function () {
-        renderPrevStates();
-    };
-
 </script>
